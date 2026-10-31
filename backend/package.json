@@ -10,7 +10,8 @@
     "seed": "tsx prisma/seed.ts",
     "test:auth": "tsx src/test-auth.ts",
     "test:plans-subs": "tsx src/test-plans-subs.ts",
-    "test:billing": "tsx src/test-billing.ts"
+    "test:billing": "tsx src/test-billing.ts",
+    "test:dashboard": "tsx src/test-dashboard.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
