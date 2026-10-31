@@ -3,6 +3,7 @@ import { z } from 'zod';
 import { prisma } from '../lib/prisma';
 import { authenticateToken, requireRole } from '../middleware/auth';
 import { calculateNextRenewalDate, computeSubscriptionStatus } from '../lib/billing-dates';
+import { calculateInvoiceFinancials, generateNextInvoiceNumber } from '../lib/invoice-calc';
 
 export const subscriptionsRouter = Router();
 
@@ -101,23 +102,56 @@ subscriptionsRouter.post(
       plan.billingInterval as 'MONTHLY' | 'YEARLY'
     );
 
-    const subscription = await prisma.subscription.create({
-      data: {
-        customerId,
-        planId,
-        status: 'ACTIVE',
-        startDate: start,
-        currentPeriodStart: start,
-        currentPeriodEnd: periodEnd,
-        cancelAtPeriodEnd: false,
-      },
-      include: {
-        plan: true,
-        customer: true,
-      },
+    const dueDate = new Date(start.getTime() + 14 * 24 * 60 * 60 * 1000);
+    const invoiceNumber = await generateNextInvoiceNumber();
+    const financials = calculateInvoiceFinancials([{ unitPrice: plan.price, quantity: 1 }], 0, 10.0);
+
+    const { subscription, invoice } = await prisma.$transaction(async (tx) => {
+      const sub = await tx.subscription.create({
+        data: {
+          customerId,
+          planId,
+          status: 'ACTIVE',
+          startDate: start,
+          currentPeriodStart: start,
+          currentPeriodEnd: periodEnd,
+          cancelAtPeriodEnd: false,
+        },
+        include: {
+          plan: true,
+          customer: true,
+        },
+      });
+
+      const inv = await tx.invoice.create({
+        data: {
+          invoiceNumber,
+          customerId,
+          subscriptionId: sub.id,
+          subtotal: financials.subtotal,
+          discountAmount: financials.discountAmount,
+          taxRate: financials.taxRate,
+          taxAmount: financials.taxAmount,
+          total: financials.total,
+          status: 'UNPAID',
+          dueDate,
+        },
+      });
+
+      await tx.invoiceItem.create({
+        data: {
+          invoiceId: inv.id,
+          description: `${plan.name} Plan - ${plan.billingInterval} Subscription`,
+          unitPrice: plan.price,
+          quantity: 1,
+          amount: plan.price,
+        },
+      });
+
+      return { subscription: sub, invoice: inv };
     });
 
-    res.status(201).json({ subscription });
+    res.status(201).json({ subscription, invoice });
   }
 );
 
