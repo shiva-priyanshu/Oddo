@@ -2,8 +2,9 @@
 
 ## Current Status
 - **Milestone:** Milestone 1 (Production-Ready MVP)
-- **Current Phase:** Phase 3 (Plans & Subscription Management Engine)
-- **Status:** Phase 3 Planned (2 waves, 7 tasks) — Ready for execution
+- **Current Phase:** Phase 3 (Plans & Subscription Management Engine) — **COMPLETE & VERIFIED**
+- **Next Phase:** Phase 4 (Billing, Invoicing & Simulated Payments)
+- **Status:** Phase 3 executed and verified across both waves (Backend Plans & Subscriptions Engine + 12 Lifecycle Tests + Frontend PlansManager/SubscriptionsManager/CustomerView). Ready for Phase 4.
 
 ---
 
@@ -24,9 +25,9 @@
 - **Roadmap:** `.planning/ROADMAP.md`
 - **Phase 1 Plans & Summaries:** `.planning/phases/01-foundation/01-01-SUMMARY.md`, `.planning/phases/01-foundation/01-02-SUMMARY.md`
 - **Phase 2 Plans & Summaries:** `.planning/phases/02-auth/02-01-SUMMARY.md`, `.planning/phases/02-auth/02-02-SUMMARY.md`
-- **Phase 3 Plans:** `.planning/phases/03-plans-subscriptions/03-01-PLAN.md`, `.planning/phases/03-plans-subscriptions/03-02-PLAN.md`
+- **Phase 3 Plans & Summaries:** `.planning/phases/03-plans-subscriptions/03-01-SUMMARY.md`, `.planning/phases/03-plans-subscriptions/03-02-SUMMARY.md`
 
 ---
 
 ## Next Step
-Run `/gsd-execute-phase 3` to begin executing Phase 3.
+Run `/gsd-plan-phase 4` to generate the detailed task execution plan for Phase 4 (Billing, Invoicing & Simulated Payments).
