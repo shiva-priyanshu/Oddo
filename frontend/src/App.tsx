@@ -51,7 +51,12 @@ function DashboardContent() {
         {activeTab === 'staff' && <StaffManager />}
 
         {/* TAB VIEW: PLANS MANAGEMENT */}
-        {activeTab === 'plans' && <PlansManager />}
+        {activeTab === 'plans' && (
+          <PlansManager
+            onNavigate={setActiveTab}
+            onOpenLogin={() => setIsLoginOpen(true)}
+          />
+        )}
 
         {/* TAB VIEW: SUBSCRIPTIONS MANAGEMENT */}
         {activeTab === 'subscriptions' && (
