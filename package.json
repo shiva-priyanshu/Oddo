@@ -1,0 +1,23 @@
+{
+  "name": "subscription-management-system",
+  "version": "1.0.0",
+  "description": "Subscription Management System (SubscriptIQ) - Full-Stack Local MVP",
+  "scripts": {
+    "build": "npm --prefix backend run build && npm --prefix frontend run build",
+    "seed": "npm --prefix backend run seed",
+    "start:backend": "npm --prefix backend run start",
+    "start:frontend": "npm --prefix frontend run preview",
+    "dev:backend": "npm --prefix backend run dev",
+    "dev:frontend": "npm --prefix frontend run dev"
+  },
+  "keywords": [
+    "subscription",
+    "billing",
+    "invoicing",
+    "saas",
+    "prisma",
+    "react"
+  ],
+  "author": "",
+  "license": "ISC"
+}
