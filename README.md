@@ -81,6 +81,18 @@ npm run dev:frontend
 
 | Persona | Email | Password | Role | Features |
 |---|---|---|---|---|
-| **Administrator** | `admin@subscriptiq.com` | `admin123` | `ADMIN` | Full control over plans, customers, invoices, MRR |
+| **Administrator** | `admin@subscriptiq.com` | `admin123` | `ADMIN` | Full control over plans, customers, invoices, MRR, staff accounts |
+| **Staff Member** | `staff@subscriptiq.com` | `staff123` | `STAFF` | Operational access to manage subscriptions, invoices, and customers |
 | **Customer 1** | `acme@example.com` | `customer123` | `CUSTOMER` | Active Pro subscriber with paid invoice |
 | **Customer 2** | `globex@example.com` | `customer123` | `CUSTOMER` | Starter plan with pending/overdue invoice |
+
+---
+
+## Testing & Quality Assurance
+
+Run the automated test suite covering RBAC, subscription billing, invoice calculation, and self-service checkout:
+
+```bash
+# Run all test suites across the project (69 tests)
+npm test
+```

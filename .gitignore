@@ -12,6 +12,9 @@ build/
 .env
 .env.local
 .env.*.local
+.env.*
+!.env.example
+!*.env.example
 
 # SQLite Database & Prisma
 *.db
