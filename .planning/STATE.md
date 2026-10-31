@@ -2,9 +2,8 @@
 
 ## Current Status
 - **Milestone:** Milestone 1 (Production-Ready MVP)
-- **Current Phase:** Phase 0 (Planning Complete)
-- **Next Phase:** Phase 1 (Project Foundation, Core Architecture & Database Schema)
-- **Status:** Ready to execute Phase 1
+- **Current Phase:** Phase 1 (Project Foundation, Core Architecture & Database Schema)
+- **Status:** Phase 1 Planned (2 waves, 4 tasks) — Ready for execution
 
 ---
 
@@ -23,8 +22,9 @@
 - **Context:** `.planning/PROJECT.md`
 - **Requirements:** `.planning/REQUIREMENTS.md`
 - **Roadmap:** `.planning/ROADMAP.md`
+- **Phase 1 Plans:** `.planning/phases/01-foundation/01-01-PLAN.md`, `.planning/phases/01-foundation/01-02-PLAN.md`
 
 ---
 
 ## Next Step
-Run `/gsd-plan-phase 1` to generate the detailed task execution plan for Phase 1.
+Run `/gsd-execute-phase 1` to begin executing Phase 1.
