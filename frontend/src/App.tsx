@@ -7,6 +7,8 @@ import { SubscriptionsManager } from './components/SubscriptionsManager';
 import { CustomerSubscriptionView } from './components/CustomerSubscriptionView';
 import { InvoicesManager } from './components/InvoicesManager';
 import { CustomerInvoicesView } from './components/CustomerInvoicesView';
+import { ExecutiveDashboard } from './components/ExecutiveDashboard';
+import { CustomerPortal } from './components/CustomerPortal';
 import {
   Shield,
   Users,
@@ -16,11 +18,10 @@ import {
   Database,
   ArrowRight,
   Sparkles,
-  Lock,
 } from 'lucide-react';
 
 function DashboardContent() {
-  const { user, isAuthenticated, isAdmin, isCustomer } = useAuth();
+  const { isAuthenticated, isAdmin, isCustomer } = useAuth();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [apiConnected, setApiConnected] = useState(false);
@@ -62,120 +63,12 @@ function DashboardContent() {
           <div className="space-y-8">
             {/* CONDITIONAL VIEW: ADMINISTRATOR DASHBOARD */}
             {isAuthenticated && isAdmin && (
-              <div className="space-y-6">
-                <div className="bg-gradient-to-r from-slate-900 via-indigo-950 to-slate-900 rounded-2xl p-7 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="space-y-2">
-                    <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-500/20 text-purple-300 border border-purple-500/30">
-                      <Shield className="h-3 w-3" />
-                      <span>Administrator Console</span>
-                    </div>
-                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                      Welcome back, {user?.name}
-                    </h1>
-                    <p className="text-xs sm:text-sm text-slate-300">
-                      Manage plans, subscriber records, renewal dates, and billing operations.
-                    </p>
-                  </div>
-
-                  <div className="flex flex-wrap items-center gap-2">
-                    <button
-                      onClick={() => setActiveTab('plans')}
-                      className="px-3.5 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-lg text-xs font-semibold transition"
-                    >
-                      Manage Plans
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('subscriptions')}
-                      className="px-3.5 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-lg text-xs font-semibold transition"
-                    >
-                      Subscriber Directory
-                    </button>
-                    <button
-                      onClick={() => setActiveTab('invoices')}
-                      className="px-3.5 py-2 bg-teal-500 hover:bg-teal-400 text-slate-900 rounded-lg text-xs font-bold transition shadow-xs"
-                    >
-                      Invoices & Billing
-                    </button>
-                  </div>
-                </div>
-
-                {/* Admin Stats Grid */}
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                  <div
-                    onClick={() => setActiveTab('plans')}
-                    className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-1 cursor-pointer hover:border-teal-400 transition"
-                  >
-                    <span className="text-xs font-medium text-slate-500">Active Plans</span>
-                    <p className="text-2xl font-bold text-slate-900">3</p>
-                    <span className="text-xs text-teal-600 font-medium">Starter, Pro, Enterprise &rarr;</span>
-                  </div>
-                  <div
-                    onClick={() => setActiveTab('subscriptions')}
-                    className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-1 cursor-pointer hover:border-teal-400 transition"
-                  >
-                    <span className="text-xs font-medium text-slate-500">Total Customers</span>
-                    <p className="text-2xl font-bold text-slate-900">2</p>
-                    <span className="text-xs text-slate-500">Acme Corp & Globex &rarr;</span>
-                  </div>
-                  <div
-                    onClick={() => setActiveTab('invoices')}
-                    className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-1 cursor-pointer hover:border-teal-400 transition"
-                  >
-                    <span className="text-xs font-medium text-slate-500">Estimated MRR</span>
-                    <p className="text-2xl font-bold text-emerald-700">$84.58</p>
-                    <span className="text-xs text-emerald-600 font-medium">Monthly Recurring &rarr;</span>
-                  </div>
-                  <div
-                    onClick={() => setActiveTab('invoices')}
-                    className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-1 cursor-pointer hover:border-teal-400 transition"
-                  >
-                    <span className="text-xs font-medium text-slate-500">Pending / Overdue Invoices</span>
-                    <p className="text-2xl font-bold text-amber-700">1</p>
-                    <span className="text-xs text-amber-600 font-medium">View Invoices Directory &rarr;</span>
-                  </div>
-                </div>
-              </div>
+              <ExecutiveDashboard onNavigate={setActiveTab} />
             )}
 
             {/* CONDITIONAL VIEW: CUSTOMER SELF-SERVICE PORTAL */}
             {isAuthenticated && isCustomer && (
-              <div className="space-y-6">
-                <div className="bg-gradient-to-r from-teal-900 via-slate-900 to-teal-950 rounded-2xl p-7 text-white shadow-md flex flex-col md:flex-row md:items-center justify-between gap-4">
-                  <div className="space-y-2">
-                    <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full text-xs font-semibold bg-teal-500/20 text-teal-300 border border-teal-500/30">
-                      <Users className="h-3 w-3" />
-                      <span>Customer Billing Portal</span>
-                    </div>
-                    <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">
-                      Hello, {user?.name}
-                    </h1>
-                    <p className="text-xs sm:text-sm text-slate-300">
-                      {user?.companyName ? `${user.companyName} Subscription Overview` : 'Manage your subscription and invoices'}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
-                    <button
-                      onClick={() => setActiveTab('invoices')}
-                      className="px-3.5 py-2 bg-teal-500 hover:bg-teal-400 text-slate-900 rounded-lg text-xs font-bold transition shadow-xs"
-                    >
-                      My Invoices & Receipts
-                    </button>
-                    <div className="px-4 py-3 bg-white/10 backdrop-blur-xs rounded-xl border border-white/10 text-xs space-y-1">
-                      <div className="flex items-center space-x-1 text-teal-300 font-semibold">
-                        <Lock className="h-3.5 w-3.5" />
-                        <span>Data Isolated: Customer ID</span>
-                      </div>
-                      <p className="text-slate-300 font-mono text-[11px] truncate max-w-[200px]">
-                        {user?.customerId || 'N/A'}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Customer View Component */}
-                <CustomerSubscriptionView />
-              </div>
+              <CustomerPortal onNavigate={setActiveTab} />
             )}
 
             {/* CONDITIONAL VIEW: PUBLIC / UNAUTHENTICATED HERO */}
@@ -185,14 +78,14 @@ function DashboardContent() {
                   <div className="max-w-2xl relative z-10 space-y-4">
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-teal-500/20 text-teal-300 border border-teal-500/30">
                       <Sparkles className="h-3.5 w-3.5 mr-1" />
-                      Phase 4 Billing & Invoicing Ready
+                      Full-Stack Subscription MVP Complete
                     </span>
                     <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                       Subscription Management System (SubscriptIQ)
                     </h1>
                     <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
                       Create flexible pricing plans, subscribe customers, track automated renewal dates,
-                      and monitor subscriber lifecycles from an intuitive dashboard.
+                      reconcile itemized invoices with simulated payments, and monitor MRR metrics.
                     </p>
                     <div className="pt-2 flex flex-wrap gap-3">
                       <button
@@ -243,7 +136,10 @@ function DashboardContent() {
                     </div>
                   </div>
 
-                  <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-2">
+                  <div
+                    onClick={() => setActiveTab('invoices')}
+                    className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-2 cursor-pointer hover:border-teal-400 transition"
+                  >
                     <div className="w-10 h-10 rounded-lg bg-emerald-50 text-emerald-600 flex items-center justify-center">
                       <CreditCard className="h-5 w-5" />
                     </div>
@@ -251,8 +147,8 @@ function DashboardContent() {
                     <p className="text-xs text-slate-500">
                       Itemized invoices, tax calculations, and simulated payment settlements.
                     </p>
-                    <div className="pt-2 text-xs font-medium text-emerald-600 flex items-center">
-                      Phase 4 Next <ArrowRight className="h-3 w-3 ml-1" />
+                    <div className="pt-2 text-xs font-semibold text-emerald-600 flex items-center">
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Verified in Phase 4
                     </div>
                   </div>
 
@@ -262,10 +158,10 @@ function DashboardContent() {
                     </div>
                     <h2 className="font-semibold text-slate-900 text-base">Executive Analytics</h2>
                     <p className="text-xs text-slate-500">
-                      MRR calculations, subscriber retention, overdue alerts, and customer portal.
+                      Live MRR calculations, subscriber retention, overdue alerts, and customer portal.
                     </p>
-                    <div className="pt-2 text-xs font-medium text-purple-600 flex items-center">
-                      Phase 5 Portal <ArrowRight className="h-3 w-3 ml-1" />
+                    <div className="pt-2 text-xs font-semibold text-emerald-600 flex items-center">
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Verified in Phase 5
                     </div>
                   </div>
                 </section>
@@ -322,7 +218,7 @@ function DashboardContent() {
       <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
 
       <footer className="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
-        SubscriptIQ &bull; Phase 3 Plans & Subscription Engine
+        SubscriptIQ &bull; Full-Stack Subscription Management System (MVP Complete)
       </footer>
     </div>
   );
