@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { verifyToken, TokenPayload } from '../lib/jwt';
+import { verifyToken, TokenPayload, UserRole } from '../lib/jwt';
 
 // Extend Express Request to hold the authenticated user payload
 declare global {
@@ -58,10 +58,10 @@ export function authenticateToken(
 }
 
 /**
- * Middleware: Require one of the specified roles (e.g. 'ADMIN').
+ * Middleware: Require one of the specified roles (e.g. 'ADMIN' | 'STAFF' | 'CUSTOMER').
  * Returns 403 if authenticated user does not have required role.
  */
-export function requireRole(...allowedRoles: Array<'ADMIN' | 'CUSTOMER'>) {
+export function requireRole(...allowedRoles: Array<UserRole>) {
   return (req: Request, res: Response, next: NextFunction): void => {
     if (!req.user) {
       res.status(401).json({
@@ -84,8 +84,45 @@ export function requireRole(...allowedRoles: Array<'ADMIN' | 'CUSTOMER'>) {
 }
 
 /**
+ * Middleware: Require a specific permission for STAFF, or bypass for ADMIN.
+ * Returns 403 if user lacks the required permission.
+ */
+export function requirePermission(permission: string) {
+  return (req: Request, res: Response, next: NextFunction): void => {
+    if (!req.user) {
+      res.status(401).json({
+        error: 'Authentication required',
+        statusCode: 401,
+      });
+      return;
+    }
+
+    // Admins have all permissions implicitly
+    if (req.user.role === 'ADMIN') {
+      next();
+      return;
+    }
+
+    // Staff must have the explicit permission granted
+    if (req.user.role === 'STAFF') {
+      const perms = req.user.permissions || [];
+      if (perms.includes(permission) || perms.includes('*')) {
+        next();
+        return;
+      }
+    }
+
+    res.status(403).json({
+      error: `Access forbidden: missing required permission '${permission}'`,
+      statusCode: 403,
+    });
+  };
+}
+
+/**
  * Middleware: Enforce customer data isolation.
- * Admins can access any customer's data.
+ * Admins have global visibility.
+ * Staff with 'manage_customers' permission have global visibility.
  * Customers can ONLY access their own customerId.
  */
 export function requireCustomerOwnership(paramName: string = 'customerId') {
@@ -102,6 +139,15 @@ export function requireCustomerOwnership(paramName: string = 'customerId') {
     if (req.user.role === 'ADMIN') {
       next();
       return;
+    }
+
+    // Staff with manage_customers have operational visibility
+    if (req.user.role === 'STAFF') {
+      const perms = req.user.permissions || [];
+      if (perms.includes('manage_customers') || perms.includes('*')) {
+        next();
+        return;
+      }
     }
 
     // Customer check: verify target customerId matches the logged-in customer's ID

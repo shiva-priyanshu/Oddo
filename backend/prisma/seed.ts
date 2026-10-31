@@ -17,17 +17,41 @@ async function main() {
 
   // 1. Password Hashes (10 salt rounds)
   const adminPasswordHash = await bcrypt.hash('admin123', 10);
+  const staffPasswordHash = await bcrypt.hash('staff123', 10);
   const customerPasswordHash = await bcrypt.hash('customer123', 10);
 
   // 2. Admin User
   const admin = await prisma.user.create({
     data: {
       email: 'admin@subscriptiq.com',
+      name: 'System Administrator',
       passwordHash: adminPasswordHash,
       role: 'ADMIN',
+      isActive: true,
+      permissions: JSON.stringify(['*']),
     },
   });
   console.log(`[Seed] Created Admin user: ${admin.email}`);
+
+  // 2b. Staff User (Operations)
+  const staff = await prisma.user.create({
+    data: {
+      email: 'staff@subscriptiq.com',
+      name: 'Sarah Jenkins (Operations)',
+      passwordHash: staffPasswordHash,
+      role: 'STAFF',
+      isActive: true,
+      permissions: JSON.stringify([
+        'manage_customers',
+        'manage_plans',
+        'manage_subscriptions',
+        'manage_invoices',
+        'manage_payments',
+        'view_reports',
+      ]),
+    },
+  });
+  console.log(`[Seed] Created Staff user: ${staff.email}`);
 
   // 3. Pricing Plans
   const starterPlan = await prisma.plan.create({

@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma';
-import { authenticateToken, requireRole } from '../middleware/auth';
+import { authenticateToken, requirePermission } from '../middleware/auth';
 import { calculateNextRenewalDate, computeSubscriptionStatus } from '../lib/billing-dates';
 import { calculateInvoiceFinancials, generateNextInvoiceNumber } from '../lib/invoice-calc';
 
@@ -19,7 +19,9 @@ const cancelSubscriptionSchema = z.object({
 
 /**
  * GET /api/subscriptions
- * Admin view: all subscriptions. Customer view: their own subscriptions only.
+ * Admin view: all subscriptions.
+ * Staff view: all subscriptions (if granted manage_subscriptions).
+ * Customer view: their own subscriptions only.
  */
 subscriptionsRouter.get(
   '/',
@@ -30,8 +32,20 @@ subscriptionsRouter.get(
       return;
     }
 
+    if (req.user.role === 'STAFF') {
+      const perms = req.user.permissions || [];
+      if (!perms.includes('manage_subscriptions')) {
+        res.status(403).json({
+          error: 'Access forbidden: missing manage_subscriptions permission',
+          statusCode: 403,
+        });
+        return;
+      }
+    }
+
     const where =
-      req.user.role === 'ADMIN'
+      req.user.role === 'ADMIN' ||
+      (req.user.role === 'STAFF' && req.user.permissions?.includes('manage_subscriptions'))
         ? {}
         : { customerId: req.user.customerId || 'non-existent-id' };
 
@@ -56,12 +70,12 @@ subscriptionsRouter.get(
 
 /**
  * POST /api/subscriptions
- * Admin assigns a plan to a customer, calculating period dates.
+ * Admin or Staff (with manage_subscriptions) assigns a plan to a customer, calculating period dates.
  */
 subscriptionsRouter.post(
   '/',
   authenticateToken,
-  requireRole('ADMIN'),
+  requirePermission('manage_subscriptions'),
   async (req: Request, res: Response): Promise<void> => {
     const parseResult = createSubscriptionSchema.safeParse(req.body);
     if (!parseResult.success) {
@@ -158,7 +172,7 @@ subscriptionsRouter.post(
 /**
  * PATCH /api/subscriptions/:id/cancel
  * Cancel a subscription immediately or schedule cancellation at period end.
- * Protected by ownership for customers, global for admins.
+ * Protected by ownership for customers, manage_subscriptions for staff, global for admins.
  */
 subscriptionsRouter.patch(
   '/:id/cancel',
@@ -181,13 +195,25 @@ subscriptionsRouter.patch(
       return;
     }
 
-    // Ownership check: Customers can only cancel their own subscription
-    if (req.user.role === 'CUSTOMER' && sub.customerId !== req.user.customerId) {
-      res.status(403).json({
-        error: 'Access forbidden: cannot modify another customer subscription',
-        statusCode: 403,
-      });
-      return;
+    // Role & permission validation
+    if (req.user.role === 'STAFF') {
+      const perms = req.user.permissions || [];
+      if (!perms.includes('manage_subscriptions')) {
+        res.status(403).json({
+          error: 'Access forbidden: missing manage_subscriptions permission',
+          statusCode: 403,
+        });
+        return;
+      }
+    } else if (req.user.role === 'CUSTOMER') {
+      // Ownership check: Customers can only cancel their own subscription
+      if (sub.customerId !== req.user.customerId) {
+        res.status(403).json({
+          error: 'Access forbidden: cannot modify another customer subscription',
+          statusCode: 403,
+        });
+        return;
+      }
     }
 
     const parseResult = cancelSubscriptionSchema.safeParse(req.body);

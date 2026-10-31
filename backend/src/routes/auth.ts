@@ -64,10 +64,35 @@ authRouter.post('/login', async (req: Request, res: Response): Promise<void> => 
     return;
   }
 
+  if (user.isActive === false) {
+    res.status(403).json({
+      error: 'Account is deactivated. Please contact an administrator.',
+      statusCode: 403,
+    });
+    return;
+  }
+
+  let permissions: string[] = [];
+  if (user.permissions) {
+    try {
+      permissions = JSON.parse(user.permissions);
+    } catch {
+      permissions = [];
+    }
+  }
+
+  const role = user.role as 'ADMIN' | 'STAFF' | 'CUSTOMER';
+  const displayName =
+    user.name ||
+    user.customer?.name ||
+    (role === 'ADMIN' ? 'Administrator' : role === 'STAFF' ? 'Staff Member' : 'Customer');
+
   const token = signToken({
     userId: user.id,
     email: user.email,
-    role: user.role as 'ADMIN' | 'CUSTOMER',
+    role,
+    name: displayName,
+    permissions,
     customerId: user.customer?.id,
   });
 
@@ -78,9 +103,11 @@ authRouter.post('/login', async (req: Request, res: Response): Promise<void> => 
       id: user.id,
       email: user.email,
       role: user.role,
-      name: user.customer?.name || (user.role === 'ADMIN' ? 'Administrator' : 'Customer'),
+      name: displayName,
       companyName: user.customer?.companyName || null,
       customerId: user.customer?.id || null,
+      permissions,
+      isActive: user.isActive,
     },
   });
 });
@@ -190,15 +217,32 @@ authRouter.get('/me', authenticateToken, async (req: Request, res: Response): Pr
     return;
   }
 
+  let permissions: string[] = [];
+  if (user.permissions) {
+    try {
+      permissions = JSON.parse(user.permissions);
+    } catch {
+      permissions = [];
+    }
+  }
+
+  const role = user.role as 'ADMIN' | 'STAFF' | 'CUSTOMER';
+  const displayName =
+    user.name ||
+    user.customer?.name ||
+    (role === 'ADMIN' ? 'Administrator' : role === 'STAFF' ? 'Staff Member' : 'Customer');
+
   res.status(200).json({
     user: {
       id: user.id,
       email: user.email,
       role: user.role,
-      name: user.customer?.name || (user.role === 'ADMIN' ? 'Administrator' : 'Customer'),
+      name: displayName,
       companyName: user.customer?.companyName || null,
       customerId: user.customer?.id || null,
       customer: user.customer || null,
+      permissions,
+      isActive: user.isActive,
     },
   });
 });

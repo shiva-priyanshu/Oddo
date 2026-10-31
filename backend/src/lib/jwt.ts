@@ -1,9 +1,13 @@
 import crypto from 'crypto';
 
+export type UserRole = 'ADMIN' | 'STAFF' | 'CUSTOMER';
+
 export interface TokenPayload {
   userId: string;
   email: string;
-  role: 'ADMIN' | 'CUSTOMER';
+  role: UserRole;
+  name?: string;
+  permissions?: string[];
   customerId?: string;
   iat: number;
   exp: number;
@@ -114,7 +118,7 @@ export function verifyToken(token: string): TokenPayload {
     throw new Error('MISSING_REQUIRED_CLAIMS');
   }
 
-  if (payload.role !== 'ADMIN' && payload.role !== 'CUSTOMER') {
+  if (payload.role !== 'ADMIN' && payload.role !== 'STAFF' && payload.role !== 'CUSTOMER') {
     throw new Error('INVALID_ROLE_CLAIM');
   }
 

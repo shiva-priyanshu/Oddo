@@ -10,8 +10,11 @@ datasource db {
 model User {
   id           String    @id @default(cuid())
   email        String    @unique
+  name         String?
   passwordHash String
-  role         String    @default("CUSTOMER") // "ADMIN" | "CUSTOMER"
+  role         String    @default("CUSTOMER") // "ADMIN" | "STAFF" | "CUSTOMER"
+  isActive     Boolean   @default(true)
+  permissions  String    @default("[]") // JSON string of granted permissions (for STAFF)
   customer     Customer?
   createdAt    DateTime  @default(now())
   updatedAt    DateTime  @updatedAt

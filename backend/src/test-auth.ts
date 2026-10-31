@@ -283,6 +283,174 @@ async function runTests() {
       await prisma.user.deleteMany({ where: { id: regRes.body.user.id } });
     }
 
+    // ====================================================
+    // Three Distinct Roles & Staff Management Verification
+    // ====================================================
+
+    // 14. Valid Staff Login
+    const staffLoginRes = await dispatch('POST', '/api/auth/login', {}, {
+      email: 'staff@subscriptiq.com',
+      password: 'staff123',
+    });
+    assert(
+      '14. Valid Staff Login returns HTTP 200 with role STAFF and parsed permissions',
+      staffLoginRes.status === 200 &&
+        typeof staffLoginRes.body.token === 'string' &&
+        staffLoginRes.body.user.role === 'STAFF' &&
+        Array.isArray(staffLoginRes.body.user.permissions) &&
+        staffLoginRes.body.user.isActive === true &&
+        !staffLoginRes.body.user.passwordHash,
+      `Status: ${staffLoginRes.status}, Body: ${JSON.stringify(staffLoginRes.body)}`
+    );
+    const staffToken = staffLoginRes.body.token;
+
+    // 15. Staff Cannot Create Staff Accounts (Admin-only boundary)
+    const staffCreateStaffRes = await dispatch(
+      'POST',
+      '/api/staff',
+      { authorization: `Bearer ${staffToken}` },
+      {
+        name: 'Malicious Staff Creation',
+        email: 'attacker_staff@example.com',
+        password: 'password123',
+        permissions: ['manage_customers'],
+      }
+    );
+    assert(
+      '15. STAFF attempting to create staff accounts returns HTTP 403 Forbidden',
+      staffCreateStaffRes.status === 403,
+      `Status: ${staffCreateStaffRes.status}`
+    );
+
+    // 16. Customer Cannot Access Staff Directory
+    const customerStaffListRes = await dispatch('GET', '/api/staff', {
+      authorization: `Bearer ${customerToken}`,
+    });
+    assert(
+      '16. CUSTOMER accessing /api/staff returns HTTP 403 Forbidden',
+      customerStaffListRes.status === 403,
+      `Status: ${customerStaffListRes.status}`
+    );
+
+    // 17. Only Admin Can Create Staff Accounts
+    const testStaffEmail = `test_ops_${Date.now()}@subscriptiq.com`;
+    const adminCreateStaffRes = await dispatch(
+      'POST',
+      '/api/staff',
+      { authorization: `Bearer ${adminToken}` },
+      {
+        name: 'Test Operations Agent',
+        email: testStaffEmail,
+        password: 'temporaryPassword123',
+        permissions: ['manage_customers'],
+      }
+    );
+    assert(
+      '17. ADMIN creating staff account returns HTTP 201 with role STAFF and hashed password hidden',
+      adminCreateStaffRes.status === 201 &&
+        adminCreateStaffRes.body.staff.role === 'STAFF' &&
+        adminCreateStaffRes.body.staff.isActive === true &&
+        adminCreateStaffRes.body.staff.permissionsList.includes('manage_customers') &&
+        !adminCreateStaffRes.body.staff.passwordHash,
+      `Status: ${adminCreateStaffRes.status}`
+    );
+    const createdStaffId = adminCreateStaffRes.body?.staff?.id;
+
+    // 18. Admin Can Update Staff Permissions and Deactivate Account
+    const adminUpdateStaffRes = await dispatch(
+      'PATCH',
+      `/api/staff/${createdStaffId}`,
+      { authorization: `Bearer ${adminToken}` },
+      {
+        isActive: false,
+        permissions: ['manage_customers', 'manage_invoices'],
+      }
+    );
+    assert(
+      '18. ADMIN updates staff status to deactivated (isActive: false) and updates permissions',
+      adminUpdateStaffRes.status === 200 &&
+        adminUpdateStaffRes.body.staff.isActive === false &&
+        adminUpdateStaffRes.body.staff.permissionsList.includes('manage_invoices'),
+      `Status: ${adminUpdateStaffRes.status}`
+    );
+
+    // 19. Deactivated Staff Login Rejected
+    const deactivatedLoginRes = await dispatch('POST', '/api/auth/login', {}, {
+      email: testStaffEmail,
+      password: 'temporaryPassword123',
+    });
+    assert(
+      '19. Deactivated staff login is rejected with HTTP 403 Forbidden',
+      deactivatedLoginRes.status === 403 &&
+        deactivatedLoginRes.body.error === 'Account is deactivated. Please contact an administrator.',
+      `Status: ${deactivatedLoginRes.status}, Body: ${JSON.stringify(deactivatedLoginRes.body)}`
+    );
+
+    // 20. Staff with Permission Can Access Authorized Module
+    const staffCustomerListRes = await dispatch('GET', '/api/customers', {
+      authorization: `Bearer ${staffToken}`,
+    });
+    assert(
+      '20. STAFF with manage_customers can access /api/customers',
+      staffCustomerListRes.status === 200 &&
+        Array.isArray(staffCustomerListRes.body.customers),
+      `Status: ${staffCustomerListRes.status}`
+    );
+
+    // 21. Staff Without Permission Cannot Access Restricted Action
+    // Re-activate test staff with ONLY manage_customers permission
+    await prisma.user.update({
+      where: { id: createdStaffId },
+      data: { isActive: true, permissions: JSON.stringify(['manage_customers']) },
+    });
+    const limitedStaffLoginRes = await dispatch('POST', '/api/auth/login', {}, {
+      email: testStaffEmail,
+      password: 'temporaryPassword123',
+    });
+    const limitedStaffToken = limitedStaffLoginRes.body.token;
+
+    const staffCreatePlanRes = await dispatch(
+      'POST',
+      '/api/plans',
+      { authorization: `Bearer ${limitedStaffToken}` },
+      {
+        name: 'Unauthorized Plan',
+        description: 'Should fail',
+        price: 99,
+        billingInterval: 'MONTHLY',
+        features: ['test'],
+      }
+    );
+    assert(
+      '21. STAFF lacking manage_plans permission cannot create plans (HTTP 403 Forbidden)',
+      staffCreatePlanRes.status === 403,
+      `Status: ${staffCreatePlanRes.status}`
+    );
+
+    // 22. Customer Cannot Access Another Customer's Invoices
+    const globexInvoice = await prisma.invoice.findFirst({
+      where: { customerId: globexCustomer.id },
+    });
+    if (globexInvoice) {
+      const crossInvoiceRes = await dispatch(
+        'GET',
+        `/api/invoices/${globexInvoice.id}`,
+        { authorization: `Bearer ${customerToken}` }
+      );
+      assert(
+        "22. Customer attempting to access another customer's invoice returns HTTP 403 Forbidden",
+        crossInvoiceRes.status === 403,
+        `Status: ${crossInvoiceRes.status}`
+      );
+    } else {
+      assert('22. Customer invoice isolation check skipped (no invoice found)', true);
+    }
+
+    // Clean up created test staff
+    if (createdStaffId) {
+      await prisma.user.deleteMany({ where: { id: createdStaffId } });
+    }
+
   } catch (err: any) {
     console.error('Test execution error:', err);
     failed++;

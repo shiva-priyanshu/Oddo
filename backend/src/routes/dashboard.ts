@@ -1,18 +1,18 @@
 import { Router, Request, Response } from 'express';
 import { prisma } from '../lib/prisma';
-import { authenticateToken, requireRole } from '../middleware/auth';
+import { authenticateToken, requireRole, requirePermission } from '../middleware/auth';
 import { computeLiveInvoiceStatus } from '../lib/invoice-calc';
 
 export const dashboardRouter = Router();
 
 /**
  * GET /api/dashboard/stats
- * Admin executive analytics endpoint aggregating MRR, ARR, renewals, plan tiers, and activity.
+ * Admin and Staff (with view_reports) analytics endpoint aggregating MRR, ARR, renewals, plan tiers, and activity.
  */
 dashboardRouter.get(
   '/stats',
   authenticateToken,
-  requireRole('ADMIN'),
+  requirePermission('view_reports'),
   async (_req: Request, res: Response): Promise<void> => {
     const now = new Date();
     const sevenDaysFromNow = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);

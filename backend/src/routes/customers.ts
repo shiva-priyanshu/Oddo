@@ -4,6 +4,7 @@ import { prisma } from '../lib/prisma';
 import {
   authenticateToken,
   requireRole,
+  requirePermission,
   requireCustomerOwnership,
 } from '../middleware/auth';
 
@@ -24,7 +25,7 @@ const createCustomerSchema = z.object({
 customersRouter.get(
   '/',
   authenticateToken,
-  requireRole('ADMIN'),
+  requirePermission('manage_customers'),
   async (_req: Request, res: Response): Promise<void> => {
     const customers = await prisma.customer.findMany({
       orderBy: { createdAt: 'desc' },
@@ -84,7 +85,7 @@ customersRouter.get(
 customersRouter.post(
   '/',
   authenticateToken,
-  requireRole('ADMIN'),
+  requirePermission('manage_customers'),
   async (req: Request, res: Response): Promise<void> => {
     const parseResult = createCustomerSchema.safeParse(req.body);
     if (!parseResult.success) {

@@ -1,7 +1,7 @@
 import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import { prisma } from '../lib/prisma';
-import { authenticateToken, requireRole } from '../middleware/auth';
+import { authenticateToken, requireRole, requirePermission } from '../middleware/auth';
 import { verifyToken } from '../lib/jwt';
 
 export const plansRouter = Router();
@@ -29,18 +29,23 @@ const planSchema = z.object({
  */
 plansRouter.get('/', async (req: Request, res: Response): Promise<void> => {
   // Check optional auth header for admin role
-  let isAdmin = false;
+  let canManagePlans = false;
   const authHeader = req.headers['authorization'];
   if (authHeader && authHeader.startsWith('Bearer ')) {
     try {
       const payload = verifyToken(authHeader.split(' ')[1]);
-      if (payload.role === 'ADMIN') isAdmin = true;
+      if (
+        payload.role === 'ADMIN' ||
+        (payload.role === 'STAFF' && payload.permissions?.includes('manage_plans'))
+      ) {
+        canManagePlans = true;
+      }
     } catch {
       // Ignored for public listing
     }
   }
 
-  const where = isAdmin ? {} : { isActive: true };
+  const where = canManagePlans ? {} : { isActive: true };
   const plans = await prisma.plan.findMany({
     where,
     orderBy: { price: 'asc' },
@@ -75,7 +80,7 @@ plansRouter.get('/', async (req: Request, res: Response): Promise<void> => {
 plansRouter.post(
   '/',
   authenticateToken,
-  requireRole('ADMIN'),
+  requirePermission('manage_plans'),
   async (req: Request, res: Response): Promise<void> => {
     const parseResult = planSchema.safeParse(req.body);
     if (!parseResult.success) {
@@ -111,7 +116,7 @@ plansRouter.post(
 plansRouter.put(
   '/:id',
   authenticateToken,
-  requireRole('ADMIN'),
+  requirePermission('manage_plans'),
   async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
 
@@ -146,7 +151,7 @@ plansRouter.put(
 plansRouter.patch(
   '/:id/toggle',
   authenticateToken,
-  requireRole('ADMIN'),
+  requirePermission('manage_plans'),
   async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
 

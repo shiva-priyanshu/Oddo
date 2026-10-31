@@ -2,7 +2,7 @@ import { Router, Request, Response } from 'express';
 import { z } from 'zod';
 import crypto from 'crypto';
 import { prisma } from '../lib/prisma';
-import { authenticateToken, requireRole } from '../middleware/auth';
+import { authenticateToken, requirePermission } from '../middleware/auth';
 import {
   calculateInvoiceFinancials,
   generateNextInvoiceNumber,
@@ -38,6 +38,7 @@ const recordPaymentSchema = z.object({
 /**
  * GET /api/invoices
  * Lists invoices with status filtering. Restricts customers to their own records.
+ * For STAFF, requires manage_invoices, manage_payments, or view_reports.
  */
 invoicesRouter.get(
   '/',
@@ -46,6 +47,14 @@ invoicesRouter.get(
     if (!req.user) {
       res.status(401).json({ error: 'Unauthenticated', statusCode: 401 });
       return;
+    }
+
+    if (req.user.role === 'STAFF') {
+      const perms = req.user.permissions || [];
+      if (!perms.includes('manage_invoices') && !perms.includes('manage_payments') && !perms.includes('view_reports')) {
+        res.status(403).json({ error: 'Access forbidden: missing invoice permissions', statusCode: 403 });
+        return;
+      }
     }
 
     const { status, customerId: queryCustomerId } = req.query;
@@ -134,8 +143,14 @@ invoicesRouter.get(
       return;
     }
 
-    // Customer ownership validation
-    if (req.user.role === 'CUSTOMER' && invoice.customerId !== req.user.customerId) {
+    // Role and ownership check
+    if (req.user.role === 'STAFF') {
+      const perms = req.user.permissions || [];
+      if (!perms.includes('manage_invoices') && !perms.includes('manage_payments') && !perms.includes('view_reports')) {
+        res.status(403).json({ error: 'Access forbidden: missing invoice permissions', statusCode: 403 });
+        return;
+      }
+    } else if (req.user.role === 'CUSTOMER' && invoice.customerId !== req.user.customerId) {
       res.status(403).json({
         error: 'Access forbidden: cannot view another customer invoice',
         statusCode: 403,
@@ -160,12 +175,12 @@ invoicesRouter.get(
 
 /**
  * POST /api/invoices
- * Admin generates an ad-hoc custom invoice.
+ * Admin or Staff (with manage_invoices) generates an ad-hoc custom invoice.
  */
 invoicesRouter.post(
   '/',
   authenticateToken,
-  requireRole('ADMIN'),
+  requirePermission('manage_invoices'),
   async (req: Request, res: Response): Promise<void> => {
     const parseResult = createInvoiceSchema.safeParse(req.body);
     if (!parseResult.success) {
@@ -229,12 +244,12 @@ invoicesRouter.post(
 
 /**
  * POST /api/invoices/:id/payments
- * Admin records a simulated payment against an invoice.
+ * Admin or Staff (with manage_payments) records a simulated payment against an invoice.
  */
 invoicesRouter.post(
   '/:id/payments',
   authenticateToken,
-  requireRole('ADMIN'),
+  requirePermission('manage_payments'),
   async (req: Request, res: Response): Promise<void> => {
     const { id } = req.params;
 

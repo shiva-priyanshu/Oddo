@@ -7,6 +7,7 @@ import { customersRouter } from './routes/customers';
 import { subscriptionsRouter } from './routes/subscriptions';
 import { invoicesRouter } from './routes/invoices';
 import { dashboardRouter } from './routes/dashboard';
+import { staffRouter } from './routes/staff';
 import { errorHandler } from './middleware/errorHandler';
 
 export const app = express();
@@ -23,6 +24,7 @@ app.use('/api/customers', customersRouter);
 app.use('/api/subscriptions', subscriptionsRouter);
 app.use('/api/invoices', invoicesRouter);
 app.use('/api/dashboard', dashboardRouter);
+app.use('/api/staff', staffRouter);
 
 // Centralized Error Handling Middleware (must be registered after routes)
 app.use(errorHandler);
