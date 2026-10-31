@@ -5,6 +5,8 @@ import { LoginModal } from './components/LoginModal';
 import { PlansManager } from './components/PlansManager';
 import { SubscriptionsManager } from './components/SubscriptionsManager';
 import { CustomerSubscriptionView } from './components/CustomerSubscriptionView';
+import { InvoicesManager } from './components/InvoicesManager';
+import { CustomerInvoicesView } from './components/CustomerInvoicesView';
 import {
   Shield,
   Users,
@@ -50,6 +52,11 @@ function DashboardContent() {
           isAdmin ? <SubscriptionsManager /> : <CustomerSubscriptionView />
         )}
 
+        {/* TAB VIEW: INVOICES & SIMULATED PAYMENTS */}
+        {activeTab === 'invoices' && (
+          isAdmin ? <InvoicesManager /> : <CustomerInvoicesView />
+        )}
+
         {/* TAB VIEW: OVERVIEW (DEFAULT DASHBOARD) */}
         {activeTab === 'overview' && (
           <div className="space-y-8">
@@ -79,9 +86,15 @@ function DashboardContent() {
                     </button>
                     <button
                       onClick={() => setActiveTab('subscriptions')}
-                      className="px-3.5 py-2 bg-teal-500 hover:bg-teal-400 text-slate-900 rounded-lg text-xs font-bold transition shadow-xs"
+                      className="px-3.5 py-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white rounded-lg text-xs font-semibold transition"
                     >
                       Subscriber Directory
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('invoices')}
+                      className="px-3.5 py-2 bg-teal-500 hover:bg-teal-400 text-slate-900 rounded-lg text-xs font-bold transition shadow-xs"
+                    >
+                      Invoices & Billing
                     </button>
                   </div>
                 </div>
@@ -104,15 +117,21 @@ function DashboardContent() {
                     <p className="text-2xl font-bold text-slate-900">2</p>
                     <span className="text-xs text-slate-500">Acme Corp & Globex &rarr;</span>
                   </div>
-                  <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+                  <div
+                    onClick={() => setActiveTab('invoices')}
+                    className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-1 cursor-pointer hover:border-teal-400 transition"
+                  >
                     <span className="text-xs font-medium text-slate-500">Estimated MRR</span>
                     <p className="text-2xl font-bold text-emerald-700">$84.58</p>
-                    <span className="text-xs text-emerald-600 font-medium">Monthly Recurring</span>
+                    <span className="text-xs text-emerald-600 font-medium">Monthly Recurring &rarr;</span>
                   </div>
-                  <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-1">
+                  <div
+                    onClick={() => setActiveTab('invoices')}
+                    className="bg-white p-5 rounded-xl border border-slate-200 shadow-xs space-y-1 cursor-pointer hover:border-teal-400 transition"
+                  >
                     <span className="text-xs font-medium text-slate-500">Pending / Overdue Invoices</span>
                     <p className="text-2xl font-bold text-amber-700">1</p>
-                    <span className="text-xs text-amber-600 font-medium">Globex Corp ($20.90)</span>
+                    <span className="text-xs text-amber-600 font-medium">View Invoices Directory &rarr;</span>
                   </div>
                 </div>
               </div>
@@ -135,14 +154,22 @@ function DashboardContent() {
                     </p>
                   </div>
 
-                  <div className="px-4 py-3 bg-white/10 backdrop-blur-xs rounded-xl border border-white/10 text-xs space-y-1">
-                    <div className="flex items-center space-x-1 text-teal-300 font-semibold">
-                      <Lock className="h-3.5 w-3.5" />
-                      <span>Data Isolated: Customer ID</span>
+                  <div className="flex flex-col sm:flex-row items-start sm:items-center gap-3">
+                    <button
+                      onClick={() => setActiveTab('invoices')}
+                      className="px-3.5 py-2 bg-teal-500 hover:bg-teal-400 text-slate-900 rounded-lg text-xs font-bold transition shadow-xs"
+                    >
+                      My Invoices & Receipts
+                    </button>
+                    <div className="px-4 py-3 bg-white/10 backdrop-blur-xs rounded-xl border border-white/10 text-xs space-y-1">
+                      <div className="flex items-center space-x-1 text-teal-300 font-semibold">
+                        <Lock className="h-3.5 w-3.5" />
+                        <span>Data Isolated: Customer ID</span>
+                      </div>
+                      <p className="text-slate-300 font-mono text-[11px] truncate max-w-[200px]">
+                        {user?.customerId || 'N/A'}
+                      </p>
                     </div>
-                    <p className="text-slate-300 font-mono text-[11px] truncate max-w-[200px]">
-                      {user?.customerId || 'N/A'}
-                    </p>
                   </div>
                 </div>
 
@@ -158,7 +185,7 @@ function DashboardContent() {
                   <div className="max-w-2xl relative z-10 space-y-4">
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-teal-500/20 text-teal-300 border border-teal-500/30">
                       <Sparkles className="h-3.5 w-3.5 mr-1" />
-                      Phase 3 Subscription Engine Ready
+                      Phase 4 Billing & Invoicing Ready
                     </span>
                     <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                       Subscription Management System (SubscriptIQ)

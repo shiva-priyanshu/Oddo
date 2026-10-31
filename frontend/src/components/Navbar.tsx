@@ -40,7 +40,7 @@ export const Navbar: React.FC<NavbarProps> = ({
             <div>
               <span className="text-lg font-bold text-slate-900 tracking-tight">SubscriptIQ</span>
               <span className="hidden sm:inline-block ml-2 px-2 py-0.5 text-xs font-semibold bg-teal-50 text-teal-700 rounded-full border border-teal-200">
-                Phase 2 Auth
+                Phase 4 Billing
               </span>
             </div>
           </div>
