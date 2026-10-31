@@ -15,5 +15,8 @@
     "auth": "JWT with bcrypt + Role-Based Access Control (ADMIN, CUSTOMER)",
     "validation": "Zod"
   },
-  "workspace_path": "/Users/shivapriyanshu112gmail.com/.gemini/antigravity/scratch/subscription-management-system"
+  "workspace_path": "/Users/shivapriyanshu112gmail.com/.gemini/antigravity/scratch/subscription-management-system",
+  "git": {
+    "allow_default_branch_commits": true
+  }
 }

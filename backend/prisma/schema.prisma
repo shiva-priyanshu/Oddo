@@ -1,0 +1,125 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id           String    @id @default(cuid())
+  email        String    @unique
+  passwordHash String
+  role         String    @default("CUSTOMER") // "ADMIN" | "CUSTOMER"
+  customer     Customer?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+
+  @@map("users")
+}
+
+model Customer {
+  id             String         @id @default(cuid())
+  userId         String?        @unique
+  user           User?          @relation(fields: [userId], references: [id], onDelete: SetNull)
+  name           String
+  email          String         @unique
+  companyName    String?
+  billingAddress String?
+  phone          String?
+  subscriptions  Subscription[]
+  invoices       Invoice[]
+  createdAt      DateTime       @default(now())
+  updatedAt      DateTime       @updatedAt
+
+  @@map("customers")
+}
+
+model Plan {
+  id              String         @id @default(cuid())
+  name            String
+  description     String
+  price           Float
+  currency        String         @default("USD")
+  billingInterval String         @default("MONTHLY") // "MONTHLY" | "YEARLY"
+  isActive        Boolean        @default(true)
+  features        String         // JSON serialized string of features
+  subscriptions   Subscription[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+
+  @@map("plans")
+}
+
+model Subscription {
+  id                 String    @id @default(cuid())
+  customerId         String
+  customer           Customer  @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  planId             String
+  plan               Plan      @relation(fields: [planId], references: [id])
+  status             String    @default("ACTIVE") // "ACTIVE" | "PENDING" | "CANCELLED" | "EXPIRED"
+  startDate          DateTime  @default(now())
+  currentPeriodStart DateTime  @default(now())
+  currentPeriodEnd   DateTime
+  cancelAtPeriodEnd  Boolean   @default(false)
+  invoices           Invoice[]
+  createdAt          DateTime  @default(now())
+  updatedAt          DateTime  @updatedAt
+
+  @@index([customerId])
+  @@index([planId])
+  @@map("subscriptions")
+}
+
+model Invoice {
+  id             String        @id @default(cuid())
+  invoiceNumber  String        @unique
+  customerId     String
+  customer       Customer      @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  subscriptionId String?
+  subscription   Subscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  subtotal       Float
+  discountAmount Float         @default(0)
+  taxRate        Float         @default(0)
+  taxAmount      Float         @default(0)
+  total          Float
+  status         String        @default("UNPAID") // "DRAFT" | "UNPAID" | "PAID" | "OVERDUE"
+  dueDate        DateTime
+  items          InvoiceItem[]
+  payments       Payment[]
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+
+  @@index([customerId])
+  @@index([subscriptionId])
+  @@map("invoices")
+}
+
+model InvoiceItem {
+  id          String   @id @default(cuid())
+  invoiceId   String
+  invoice     Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  description String
+  unitPrice   Float
+  quantity    Int      @default(1)
+  amount      Float
+  createdAt   DateTime @default(now())
+
+  @@index([invoiceId])
+  @@map("invoice_items")
+}
+
+model Payment {
+  id             String   @id @default(cuid())
+  invoiceId      String
+  invoice        Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  amount         Float
+  paymentMethod  String   // "CREDIT_CARD" | "BANK_TRANSFER" | "CASH" | "SIMULATED"
+  transactionRef String
+  paidAt         DateTime @default(now())
+  createdAt      DateTime @default(now())
+
+  @@index([invoiceId])
+  @@map("payments")
+}
