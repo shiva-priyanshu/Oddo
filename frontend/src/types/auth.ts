@@ -1,4 +1,4 @@
-export type UserRole = 'ADMIN' | 'CUSTOMER';
+export type UserRole = 'ADMIN' | 'STAFF' | 'CUSTOMER';
 
 export interface User {
   id: string;
@@ -7,6 +7,34 @@ export interface User {
   name: string;
   companyName?: string | null;
   customerId?: string | null;
+  permissions?: string[];
+  isActive?: boolean;
+}
+
+export interface StaffMember {
+  id: string;
+  name: string;
+  email: string;
+  role: 'STAFF';
+  isActive: boolean;
+  permissions: string;
+  permissionsList: string[];
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface CreateStaffData {
+  name: string;
+  email: string;
+  password: string;
+  permissions: string[];
+}
+
+export interface UpdateStaffData {
+  name?: string;
+  permissions?: string[];
+  isActive?: boolean;
+  password?: string;
 }
 
 export interface AuthResponse {

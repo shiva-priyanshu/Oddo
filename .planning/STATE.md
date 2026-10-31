@@ -1,26 +1,36 @@
 # Project State: Subscription Management System
 
 ## Current Status
-- **Milestone:** Milestone 1 (Production-Ready MVP) — 100% COMPLETE & FULLY VERIFIED
-- **Current Phase:** Phase 5 (Executive Dashboard, Analytics & Customer Portal) — COMPLETE & VERIFIED
+- **Milestone:** Milestone 1 (Production-Ready MVP with Multi-Role RBAC) — 100% COMPLETE & FULLY VERIFIED
+- **Current Phase:** Phase 5 & Multi-Role RBAC (ADMIN, STAFF, CUSTOMER) — COMPLETE & VERIFIED
 - **All Phases Status:**
   - Phase 1: Foundation & Database Schema — COMPLETE (Commits 5f5d0d4, 2b62693, caf350a)
   - Phase 2: Authentication & RBAC — COMPLETE (Commits 9e11833, 43f0bb9)
   - Phase 3: Plans & Subscriptions — COMPLETE (Commits 67b6b97, 8b5dc30)
   - Phase 4: Billing & Simulated Payments — COMPLETE (Commits f4f7cc1, 90b90de)
-  - Phase 5: Executive Dashboard & Customer Portal — COMPLETE (Wave 1: 1b136e8, Wave 2: Ready)
-- **Status:** 51/51 automated tests passing across 4 dedicated test suites, frontend & root builds green with zero TypeScript diagnostics.
+  - Phase 5: Executive Dashboard & Customer Portal — COMPLETE (Commits 1b136e8, 2bca047)
+  - Role Enhancement: 3 Distinct Roles (ADMIN, STAFF, CUSTOMER) & Staff Management UI — COMPLETE
+- **Test Status:** 60/60 automated tests passing across 4 dedicated test suites (`test:auth`, `test:plans-subs`, `test:billing`, `test:dashboard`), frontend & root builds green with zero TypeScript diagnostics.
 
 ---
 
 ## Architectural & Technical Decisions
 1. **Repository Layout:** Modular client-server structure under `/Users/shivapriyanshu112gmail.com/.gemini/antigravity/scratch/subscription-management-system`.
-2. **Database Engine:** Prisma ORM with SQLite as default engine for zero-dependency local macOS execution, with schema designed for 1-to-1 PostgreSQL compatibility.
+2. **Database Engine:** Prisma ORM with SQLite as default engine for zero-dependency local macOS execution, with schema designed for 1-to-1 PostgreSQL compatibility. Added `name`, `role`, `isActive`, and `permissions` to `User` model.
 3. **Backend Stack:** Node.js + Express + TypeScript with Zod request validation and centralized error handling.
 4. **Frontend Stack:** React 19 + TypeScript + Vite + Tailwind CSS + Lucide React icons.
-5. **Security & RBAC:** Timing-safe JWT authentication using Node.js crypto HMAC-SHA256 with bcrypt password hashing; tab-scoped `sessionStorage`; dual roles `ADMIN` (full system control) and `CUSTOMER` (self-service portal) with customer data isolation.
+5. **Three Distinct Roles & Granular RBAC:**
+   - **ADMIN:** Unrestricted access across all operational modules, customer records, plan pricing, and executive analytics. Only ADMIN can create, activate/deactivate, and configure permissions for STAFF accounts.
+   - **STAFF:** Operational role with granular permissions (`manage_customers`, `manage_plans`, `manage_subscriptions`, `manage_invoices`, `manage_payments`, `view_reports`). Staff accounts cannot create admin or staff accounts. Staff access is guarded by `requirePermission` middleware on backend and permission-aware UI.
+   - **CUSTOMER:** Strict tenant data isolation. Customers can only view and interact with their own profile, active subscriptions, itemized invoices, and payment history.
 6. **Billing & Payments:** Complete financial calculation engine (subtotal, taxes, discounts, totals with 2-decimal precision), auto-invoicing upon subscription creation, sequential invoice numbering (`INV-YYYY-xxxx`), live overdue detection, and simulated payment reconciliation.
-7. **Executive Intelligence & Portal:** Dynamic MRR and ARR computation across monthly and annualized yearly tiers, 30-day renewal forecasting with 7-day urgency alerts, chronological activity event stream, and customer self-service billing management with 1-click demo persona switching.
+7. **Executive Intelligence, Staff Operations & Customer Portal:**
+   - Dynamic MRR and ARR computation across monthly and annualized yearly tiers.
+   - 30-day renewal forecasting with 7-day urgency alerts.
+   - Chronological activity event stream.
+   - Staff operational dashboard reflecting assigned functional modules.
+   - Admin Staff Management page with modal-based staff creation, permission assignment, and activation/deactivation controls.
+   - Customer self-service billing management with 1-click 3-role persona switching.
 
 ---
 

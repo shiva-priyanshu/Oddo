@@ -9,6 +9,8 @@ import { InvoicesManager } from './components/InvoicesManager';
 import { CustomerInvoicesView } from './components/CustomerInvoicesView';
 import { ExecutiveDashboard } from './components/ExecutiveDashboard';
 import { CustomerPortal } from './components/CustomerPortal';
+import { StaffManager } from './components/StaffManager';
+import { StaffDashboard } from './components/StaffDashboard';
 import {
   Shield,
   Users,
@@ -21,7 +23,7 @@ import {
 } from 'lucide-react';
 
 function DashboardContent() {
-  const { isAuthenticated, isAdmin, isCustomer } = useAuth();
+  const { isAuthenticated, isAdmin, isStaff, isCustomer } = useAuth();
   const [isLoginOpen, setIsLoginOpen] = useState(false);
   const [activeTab, setActiveTab] = useState('overview');
   const [apiConnected, setApiConnected] = useState(false);
@@ -45,25 +47,33 @@ function DashboardContent() {
       />
 
       <main className="flex-1 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full space-y-8">
+        {/* TAB VIEW: STAFF MANAGEMENT (ADMIN ONLY) */}
+        {activeTab === 'staff' && <StaffManager />}
+
         {/* TAB VIEW: PLANS MANAGEMENT */}
         {activeTab === 'plans' && <PlansManager />}
 
         {/* TAB VIEW: SUBSCRIPTIONS MANAGEMENT */}
         {activeTab === 'subscriptions' && (
-          isAdmin ? <SubscriptionsManager /> : <CustomerSubscriptionView />
+          isAdmin || isStaff ? <SubscriptionsManager /> : <CustomerSubscriptionView />
         )}
 
         {/* TAB VIEW: INVOICES & SIMULATED PAYMENTS */}
         {activeTab === 'invoices' && (
-          isAdmin ? <InvoicesManager /> : <CustomerInvoicesView />
+          isAdmin || isStaff ? <InvoicesManager /> : <CustomerInvoicesView />
         )}
 
-        {/* TAB VIEW: OVERVIEW (DEFAULT DASHBOARD) */}
+        {/* TAB VIEW: OVERVIEW (DEFAULT DASHBOARD PER ROLE) */}
         {activeTab === 'overview' && (
           <div className="space-y-8">
             {/* CONDITIONAL VIEW: ADMINISTRATOR DASHBOARD */}
             {isAuthenticated && isAdmin && (
               <ExecutiveDashboard onNavigate={setActiveTab} />
+            )}
+
+            {/* CONDITIONAL VIEW: STAFF OPERATIONAL DASHBOARD */}
+            {isAuthenticated && isStaff && (
+              <StaffDashboard onNavigate={setActiveTab} />
             )}
 
             {/* CONDITIONAL VIEW: CUSTOMER SELF-SERVICE PORTAL */}
@@ -78,14 +88,14 @@ function DashboardContent() {
                   <div className="max-w-2xl relative z-10 space-y-4">
                     <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold bg-teal-500/20 text-teal-300 border border-teal-500/30">
                       <Sparkles className="h-3.5 w-3.5 mr-1" />
-                      Full-Stack Subscription MVP Complete
+                      Multi-Role RBAC: Admin &bull; Staff &bull; Customer
                     </span>
                     <h1 className="text-3xl sm:text-4xl font-extrabold tracking-tight">
                       Subscription Management System (SubscriptIQ)
                     </h1>
                     <p className="text-slate-300 text-sm sm:text-base leading-relaxed">
-                      Create flexible pricing plans, subscribe customers, track automated renewal dates,
-                      reconcile itemized invoices with simulated payments, and monitor MRR metrics.
+                      Enterprise subscription engine with 3 distinct roles: full administrator controls,
+                      delegated operations staff with granular permissions, and self-service customer portal.
                     </p>
                     <div className="pt-2 flex flex-wrap gap-3">
                       <button
@@ -111,12 +121,12 @@ function DashboardContent() {
                     <div className="w-10 h-10 rounded-lg bg-teal-50 text-teal-600 flex items-center justify-center">
                       <Shield className="h-5 w-5" />
                     </div>
-                    <h2 className="font-semibold text-slate-900 text-base">Authentication & RBAC</h2>
+                    <h2 className="font-semibold text-slate-900 text-base">3 Distinct Roles & RBAC</h2>
                     <p className="text-xs text-slate-500">
-                      Timing-safe JWT validation and role isolation separating Administrators from Customers.
+                      Timing-safe JWT validation and role isolation separating ADMIN, STAFF, and CUSTOMER.
                     </p>
                     <div className="pt-2 text-xs font-semibold text-emerald-600 flex items-center">
-                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Verified in Phase 2
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Verified & Active
                     </div>
                   </div>
 
@@ -132,7 +142,7 @@ function DashboardContent() {
                       Monthly and annual tier configuration with automatic next-renewal scheduling.
                     </p>
                     <div className="pt-2 text-xs font-semibold text-emerald-600 flex items-center">
-                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Verified in Phase 3
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Verified & Active
                     </div>
                   </div>
 
@@ -148,7 +158,7 @@ function DashboardContent() {
                       Itemized invoices, tax calculations, and simulated payment settlements.
                     </p>
                     <div className="pt-2 text-xs font-semibold text-emerald-600 flex items-center">
-                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Verified in Phase 4
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Verified & Active
                     </div>
                   </div>
 
@@ -156,12 +166,12 @@ function DashboardContent() {
                     <div className="w-10 h-10 rounded-lg bg-purple-50 text-purple-600 flex items-center justify-center">
                       <Users className="h-5 w-5" />
                     </div>
-                    <h2 className="font-semibold text-slate-900 text-base">Executive Analytics</h2>
+                    <h2 className="font-semibold text-slate-900 text-base">Executive & Staff Portals</h2>
                     <p className="text-xs text-slate-500">
-                      Live MRR calculations, subscriber retention, overdue alerts, and customer portal.
+                      Live MRR calculations, staff operations dashboard, and customer self-service billing.
                     </p>
                     <div className="pt-2 text-xs font-semibold text-emerald-600 flex items-center">
-                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Verified in Phase 5
+                      <CheckCircle2 className="h-3.5 w-3.5 mr-1" /> Verified & Active
                     </div>
                   </div>
                 </section>
@@ -182,7 +192,8 @@ function DashboardContent() {
                 </span>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+                {/* Admin */}
                 <div className="p-4 rounded-lg bg-purple-50/50 border border-purple-200/60 space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-purple-800">Administrator</span>
@@ -192,6 +203,17 @@ function DashboardContent() {
                   <p className="text-xs text-slate-500 font-mono">admin123</p>
                 </div>
 
+                {/* Staff */}
+                <div className="p-4 rounded-lg bg-amber-50/50 border border-amber-200/60 space-y-1.5">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs font-bold uppercase tracking-wider text-amber-800">Operations Staff</span>
+                    <span className="text-[11px] px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-medium">STAFF</span>
+                  </div>
+                  <p className="text-xs font-mono font-semibold text-slate-800">staff@subscriptiq.com</p>
+                  <p className="text-xs text-slate-500 font-mono">staff123</p>
+                </div>
+
+                {/* Acme */}
                 <div className="p-4 rounded-lg bg-teal-50/50 border border-teal-200/60 space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-teal-800">Acme Corp</span>
@@ -201,6 +223,7 @@ function DashboardContent() {
                   <p className="text-xs text-slate-500 font-mono">customer123</p>
                 </div>
 
+                {/* Globex */}
                 <div className="p-4 rounded-lg bg-slate-50 border border-slate-200 space-y-1.5">
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-slate-700">Globex Corp</span>
@@ -218,7 +241,7 @@ function DashboardContent() {
       <LoginModal isOpen={isLoginOpen} onClose={() => setIsLoginOpen(false)} />
 
       <footer className="bg-white border-t border-slate-200 py-4 text-center text-xs text-slate-500">
-        SubscriptIQ &bull; Full-Stack Subscription Management System (MVP Complete)
+        SubscriptIQ &bull; Full-Stack Subscription Management System &bull; Multi-Role RBAC (Admin, Staff, Customer)
       </footer>
     </div>
   );

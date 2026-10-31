@@ -15,7 +15,8 @@ import {
 } from 'lucide-react';
 
 export const PlansManager: React.FC = () => {
-  const { isAdmin } = useAuth();
+  const { isAdmin, hasPermission } = useAuth();
+  const canManagePlans = isAdmin || hasPermission('manage_plans');
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -116,7 +117,7 @@ export const PlansManager: React.FC = () => {
           </p>
         </div>
 
-        {isAdmin && (
+        {canManagePlans && (
           <button
             onClick={() => {
               setFormError(null);
@@ -181,7 +182,7 @@ export const PlansManager: React.FC = () => {
                       >
                         {plan.isActive ? 'Active' : 'Inactive'}
                       </span>
-                      {isAdmin && (
+                      {canManagePlans && (
                         <button
                           onClick={() => handleToggleActive(plan.id)}
                           className="text-slate-400 hover:text-slate-700 p-0.5 transition"

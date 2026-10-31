@@ -12,7 +12,9 @@ interface AuthContextType {
   logout: () => void;
   isAuthenticated: boolean;
   isAdmin: boolean;
+  isStaff: boolean;
   isCustomer: boolean;
+  hasPermission: (permission: string) => boolean;
   clearError: () => void;
 }
 
@@ -105,6 +107,15 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const clearError = () => setError(null);
 
+  const hasPermission = (permission: string): boolean => {
+    if (!user) return false;
+    if (user.role === 'ADMIN') return true;
+    if (user.role === 'STAFF') {
+      return Array.isArray(user.permissions) && user.permissions.includes(permission);
+    }
+    return false;
+  };
+
   const value: AuthContextType = {
     user,
     token,
@@ -115,7 +126,9 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     logout,
     isAuthenticated: !!user,
     isAdmin: user?.role === 'ADMIN',
+    isStaff: user?.role === 'STAFF',
     isCustomer: user?.role === 'CUSTOMER',
+    hasPermission,
     clearError,
   };
 

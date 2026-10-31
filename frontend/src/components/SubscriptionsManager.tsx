@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CustomerWithSubs, Plan } from '../types/billing';
 import { apiClient } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import {
   Users,
   Plus,
@@ -15,6 +16,10 @@ import {
 } from 'lucide-react';
 
 export const SubscriptionsManager: React.FC = () => {
+  const { isAdmin, hasPermission } = useAuth();
+  const canManageSubs = isAdmin || hasPermission('manage_subscriptions');
+  const canManageCustomers = isAdmin || hasPermission('manage_customers');
+
   const [customers, setCustomers] = useState<CustomerWithSubs[]>([]);
   const [plans, setPlans] = useState<Plan[]>([]);
   const [loading, setLoading] = useState(true);
@@ -149,24 +154,28 @@ export const SubscriptionsManager: React.FC = () => {
         </div>
 
         <div className="flex items-center space-x-2 self-start sm:self-auto">
-          <button
-            onClick={() => setIsCustomerModalOpen(true)}
-            className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5"
-          >
-            <UserPlus className="h-4 w-4" />
-            <span>Add Customer</span>
-          </button>
-          <button
-            onClick={() => {
-              if (customers.length > 0) setSelectedCustomerId(customers[0].id);
-              if (plans.length > 0) setSelectedPlanId(plans[0].id);
-              setIsAssignOpen(true);
-            }}
-            className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold transition shadow-xs flex items-center space-x-1.5"
-          >
-            <Plus className="h-4 w-4" />
-            <span>Assign Subscription</span>
-          </button>
+          {canManageCustomers && (
+            <button
+              onClick={() => setIsCustomerModalOpen(true)}
+              className="px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-800 rounded-lg text-xs font-semibold transition flex items-center space-x-1.5"
+            >
+              <UserPlus className="h-4 w-4" />
+              <span>Add Customer</span>
+            </button>
+          )}
+          {canManageSubs && (
+            <button
+              onClick={() => {
+                if (customers.length > 0) setSelectedCustomerId(customers[0].id);
+                if (plans.length > 0) setSelectedPlanId(plans[0].id);
+                setIsAssignOpen(true);
+              }}
+              className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold transition shadow-xs flex items-center space-x-1.5"
+            >
+              <Plus className="h-4 w-4" />
+              <span>Assign Subscription</span>
+            </button>
+          )}
         </div>
       </div>
 
@@ -275,7 +284,7 @@ export const SubscriptionsManager: React.FC = () => {
                       </td>
 
                       <td className="py-4 px-6 text-right space-x-2">
-                        {activeSub && activeSub.status === 'ACTIVE' && !activeSub.cancelAtPeriodEnd && (
+                        {canManageSubs && activeSub && activeSub.status === 'ACTIVE' && !activeSub.cancelAtPeriodEnd && (
                           <button
                             onClick={() => setCancelSubId(activeSub.id)}
                             className="text-xs text-rose-600 hover:text-rose-800 font-medium transition"
@@ -283,16 +292,20 @@ export const SubscriptionsManager: React.FC = () => {
                             Cancel
                           </button>
                         )}
-                        <button
-                          onClick={() => {
-                            setSelectedCustomerId(cust.id);
-                            if (plans.length > 0) setSelectedPlanId(plans[0].id);
-                            setIsAssignOpen(true);
-                          }}
-                          className="text-xs text-teal-700 hover:text-teal-900 font-medium transition"
-                        >
-                          Assign Plan
-                        </button>
+                        {canManageSubs ? (
+                          <button
+                            onClick={() => {
+                              setSelectedCustomerId(cust.id);
+                              if (plans.length > 0) setSelectedPlanId(plans[0].id);
+                              setIsAssignOpen(true);
+                            }}
+                            className="text-xs text-teal-700 hover:text-teal-900 font-medium transition"
+                          >
+                            Assign Plan
+                          </button>
+                        ) : (
+                          <span className="text-slate-400 text-xs italic">View Only</span>
+                        )}
                       </td>
                     </tr>
                   );

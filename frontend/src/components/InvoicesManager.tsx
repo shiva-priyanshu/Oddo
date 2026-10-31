@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Invoice, InvoiceStatus, PaymentMethod } from '../types/invoice';
 import { apiClient } from '../lib/api';
+import { useAuth } from '../context/AuthContext';
 import { InvoiceDetailModal } from './InvoiceDetailModal';
 import {
   FileText,
@@ -23,6 +24,10 @@ interface CustomerOption {
 }
 
 export const InvoicesManager: React.FC = () => {
+  const { isAdmin, hasPermission } = useAuth();
+  const canManageInvoices = isAdmin || hasPermission('manage_invoices');
+  const canManagePayments = isAdmin || hasPermission('manage_payments');
+
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -257,16 +262,18 @@ export const InvoicesManager: React.FC = () => {
           </p>
         </div>
 
-        <button
-          onClick={() => {
-            fetchCustomers();
-            setIsCreateOpen(true);
-          }}
-          className="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-xs transition"
-        >
-          <Plus className="w-4 h-4 mr-1.5" />
-          Create Ad-Hoc Invoice
-        </button>
+        {canManageInvoices && (
+          <button
+            onClick={() => {
+              fetchCustomers();
+              setIsCreateOpen(true);
+            }}
+            className="inline-flex items-center px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold shadow-xs transition"
+          >
+            <Plus className="w-4 h-4 mr-1.5" />
+            Create Ad-Hoc Invoice
+          </button>
+        )}
       </div>
 
       {/* Aggregate Metric Cards */}
@@ -406,7 +413,7 @@ export const InvoicesManager: React.FC = () => {
                         View
                       </button>
 
-                      {(inv.remainingBalance || 0) > 0 && (
+                      {(inv.remainingBalance || 0) > 0 && canManagePayments && (
                         <button
                           onClick={() => handleOpenPayment(inv)}
                           className="inline-flex items-center px-2 py-1 rounded text-xs font-semibold text-teal-700 bg-teal-50 hover:bg-teal-100 transition"

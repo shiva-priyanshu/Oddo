@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAuth } from '../context/AuthContext';
-import { Shield, Users, Lock, Mail, Building, AlertCircle, X, Loader2 } from 'lucide-react';
+import { Shield, Users, Lock, Mail, Building, AlertCircle, X, Loader2, UserCog } from 'lucide-react';
 
 interface LoginModalProps {
   isOpen: boolean;
@@ -62,7 +62,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
             <p className="text-xs text-slate-500 mt-0.5">
               {isRegister
                 ? 'Register for the self-service customer billing portal'
-                : 'Access your administrator dashboard or subscriber portal'}
+                : 'Access your administrator, staff, or subscriber portal'}
             </p>
           </div>
           <button
@@ -78,29 +78,41 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
         {!isRegister && (
           <div className="px-6 py-3 bg-slate-50 border-b border-slate-100 space-y-2">
             <span className="text-[11px] font-bold uppercase tracking-wider text-slate-500">
-              1-Click Demo Quick Fill (Seeded Data):
+              1-Click Demo Quick Fill (3 Distinct Roles):
             </span>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
               <button
                 type="button"
                 onClick={() => fillCredentials('admin@subscriptiq.com', 'admin123')}
-                className="px-2 py-1.5 bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-800 rounded-md text-xs font-semibold text-center transition flex items-center justify-center space-x-1"
+                className="px-2 py-1.5 bg-purple-50 hover:bg-purple-100 border border-purple-200 text-purple-800 rounded-md text-xs font-semibold text-center transition flex items-center justify-center space-x-1"
+                title="System Administrator (Full access)"
               >
                 <Shield className="h-3 w-3" />
                 <span>Admin</span>
               </button>
               <button
                 type="button"
+                onClick={() => fillCredentials('staff@subscriptiq.com', 'staff123')}
+                className="px-2 py-1.5 bg-amber-50 hover:bg-amber-100 border border-amber-200 text-amber-800 rounded-md text-xs font-semibold text-center transition flex items-center justify-center space-x-1"
+                title="Operations Staff (Granular module permissions)"
+              >
+                <UserCog className="h-3 w-3" />
+                <span>Staff</span>
+              </button>
+              <button
+                type="button"
                 onClick={() => fillCredentials('acme@example.com', 'customer123')}
-                className="px-2 py-1.5 bg-indigo-50 hover:bg-indigo-100 border border-indigo-200 text-indigo-800 rounded-md text-xs font-semibold text-center transition flex items-center justify-center space-x-1"
+                className="px-2 py-1.5 bg-teal-50 hover:bg-teal-100 border border-teal-200 text-teal-800 rounded-md text-xs font-semibold text-center transition flex items-center justify-center space-x-1"
+                title="Customer (Acme Corp)"
               >
                 <Users className="h-3 w-3" />
-                <span>Acme Corp</span>
+                <span>Acme</span>
               </button>
               <button
                 type="button"
                 onClick={() => fillCredentials('globex@example.com', 'customer123')}
                 className="px-2 py-1.5 bg-slate-100 hover:bg-slate-200 border border-slate-200 text-slate-800 rounded-md text-xs font-semibold text-center transition flex items-center justify-center space-x-1"
+                title="Customer (Globex Corp)"
               >
                 <Users className="h-3 w-3" />
                 <span>Globex</span>
@@ -198,7 +210,7 @@ export const LoginModal: React.FC<LoginModalProps> = ({ isOpen, onClose }) => {
                 <span>Authenticating...</span>
               </>
             ) : (
-              <span>{isRegister ? 'Register Account' : 'Sign In'}</span>
+              <span>{isRegister ? 'Register Customer Account' : 'Sign In'}</span>
             )}
           </button>
 
