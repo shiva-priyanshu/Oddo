@@ -1,0 +1,19 @@
+{
+  "project_name": "Subscription Management System",
+  "project_slug": "subscription-management-system",
+  "created_at": "2026-10-31T11:21:03+05:30",
+  "workflow": {
+    "mode": "interactive",
+    "research": false,
+    "nyquist_validation": false
+  },
+  "stack": {
+    "frontend": "React 19 + TypeScript (Vite) + Tailwind CSS + Lucide React",
+    "backend": "Node.js + Express + TypeScript",
+    "orm": "Prisma ORM",
+    "database": "SQLite (default zero-config local macOS) / PostgreSQL-compatible schema",
+    "auth": "JWT with bcrypt + Role-Based Access Control (ADMIN, CUSTOMER)",
+    "validation": "Zod"
+  },
+  "workspace_path": "/Users/shivapriyanshu112gmail.com/.gemini/antigravity/scratch/subscription-management-system"
+}
