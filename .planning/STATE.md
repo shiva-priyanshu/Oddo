@@ -2,9 +2,8 @@
 
 ## Current Status
 - **Milestone:** Milestone 1 (Production-Ready MVP)
-- **Current Phase:** Phase 2 (Authentication Engine & Role-Based Access Control) — **COMPLETE & VERIFIED**
-- **Next Phase:** Phase 3 (Plans & Subscription Management Engine)
-- **Status:** Phase 2 executed and verified across both waves (Backend JWT/RBAC/Isolation + 13 Security Tests + Frontend AuthContext/LoginModal). Ready for Phase 3.
+- **Current Phase:** Phase 3 (Plans & Subscription Management Engine)
+- **Status:** Phase 3 Planned (2 waves, 7 tasks) — Ready for execution
 
 ---
 
@@ -25,8 +24,9 @@
 - **Roadmap:** `.planning/ROADMAP.md`
 - **Phase 1 Plans & Summaries:** `.planning/phases/01-foundation/01-01-SUMMARY.md`, `.planning/phases/01-foundation/01-02-SUMMARY.md`
 - **Phase 2 Plans & Summaries:** `.planning/phases/02-auth/02-01-SUMMARY.md`, `.planning/phases/02-auth/02-02-SUMMARY.md`
+- **Phase 3 Plans:** `.planning/phases/03-plans-subscriptions/03-01-PLAN.md`, `.planning/phases/03-plans-subscriptions/03-02-PLAN.md`
 
 ---
 
 ## Next Step
-Run `/gsd-plan-phase 3` to generate the detailed task execution plan for Phase 3 (Plans & Subscription Management Engine).
+Run `/gsd-execute-phase 3` to begin executing Phase 3.
