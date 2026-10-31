@@ -8,7 +8,8 @@
     "dev": "tsx watch src/index.ts",
     "start": "node dist/index.js",
     "seed": "tsx prisma/seed.ts",
-    "test:auth": "tsx src/test-auth.ts"
+    "test:auth": "tsx src/test-auth.ts",
+    "test:plans-subs": "tsx src/test-plans-subs.ts"
   },
   "prisma": {
     "seed": "tsx prisma/seed.ts"
