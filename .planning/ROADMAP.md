@@ -16,6 +16,12 @@ flowchart TD
 
 ### Phase 1: Project Foundation, Core Architecture & Database Schema
 **Goal:** Establish clean workspace structure, Express + TypeScript API server, Prisma ORM schema, and automated database migration/seeding.
+**Requirements:** REQ-DEV-01
+**Plans:** 2 plans
+
+Plans:
+- [ ] 01-01-PLAN.md — Backend API tracer, Express server architecture, Prisma ORM schema, and deterministic database seed script
+- [ ] 01-02-PLAN.md — Frontend Vite React application setup, Tailwind CSS configuration, and root workspace build orchestration
 
 - [ ] Initialize frontend (`frontend/` with Vite + React + TypeScript + Tailwind CSS) and backend (`backend/` with Express + TypeScript).
 - [ ] Define Prisma ORM schema covering:
